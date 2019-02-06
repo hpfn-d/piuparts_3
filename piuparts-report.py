@@ -40,6 +40,7 @@ import random
 import fcntl
 from urllib2 import HTTPError, URLError
 from collections import deque
+from copy import deepcopy
 
 # if python-rpy2 ain't installed, we don't draw fancy graphs
 try:
@@ -1766,9 +1767,11 @@ def dwke_update_tpl(section, problem, failures, ftpl, ptpl, pkgsdb, srcdb):
 def dwke_get_failures(pkgsdb, problem_list):
     logdict = get_file_dict(KPR_DIRS, LOG_EXT)
     kprdict = get_file_dict(KPR_DIRS, KPR_EXT)
+    cp_kprdict = deepcopy(kprdict)
+
     del_cnt = clean_cache_files(logdict, kprdict)
-    kprdict = get_file_dict(KPR_DIRS, KPR_EXT)
-    add_cnt = make_kprs(logdict, kprdict, problem_list)
+    # kprdict = get_file_dict(KPR_DIRS, KPR_EXT)
+    add_cnt = make_kprs(logdict, cp_kprdict, problem_list)
 
     failures = FailureManager(logdict)
     failures.sort_by_bugged_and_rdeps(pkgsdb)

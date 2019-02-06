@@ -28,6 +28,7 @@ import logging
 import argparse
 import fcntl
 from collections import deque
+from copy import deepcopy
 
 from piupartslib.conf import Config as PiupartsLibConfig
 from piupartslib.conf import MissingSection
@@ -89,10 +90,12 @@ def process_section(section, config, problem_list,
         kprdict = get_file_dict(workdirs, KPR_EXT)
         bugdict = get_file_dict(workdirs, BUG_EXT)
 
-        del_cnt = clean_cache_files(logdict, kprdict, recheck, recheck_failed)
+        cp_kprdict = deepcopy(kprdict)
+
+        del_cnt = clean_cache_files(logdict, cp_kprdict, recheck, recheck_failed)
         clean_cache_files(logdict, bugdict, skipnewer=True)
 
-        kprdict = get_file_dict(workdirs, KPR_EXT)
+        # kprdict = get_file_dict(workdirs, KPR_EXT)
 
         section_config = WKE_Config(section=section, defaults_section="global")
         section_config.read(CONFIG_FILE)
