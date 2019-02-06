@@ -32,8 +32,10 @@ import time
 import random
 from urllib2 import URLError
 
-import piupartslib
+from piupartslib.conf import Config as PiupartsLibConfig
+from piupartslib.conf import DistroConfig
 from piupartslib.packagesdb import LogfileExists
+from piupartslib.packagesdb import PackagesDB
 from piupartslib.conf import MissingSection
 
 
@@ -63,10 +65,10 @@ def timestamp():
     return time.strftime("[%Y-%m-%d %H:%M:%S]")
 
 
-class Config(piupartslib.conf.Config):
+class Config(PiupartsLibConfig):
 
     def __init__(self, section="master", defaults_section=None):
-        piupartslib.conf.Config.__init__(self, section,
+        PiupartsLibConfig.__init__(self, section,
                                          {
                                          "log-file": None,
                                          "master-directory": ".",
@@ -189,7 +191,7 @@ class Master(Protocol):
 
         # start with a dummy _binary_db (without Packages file), sufficient
         # for submitting finished logs
-        self._binary_db = piupartslib.packagesdb.PackagesDB(prefix=section)
+        self._binary_db = PackagesDB(prefix=section)
 
         return True
 
@@ -207,8 +209,8 @@ class Master(Protocol):
 
         config = Config(section=section, defaults_section="global")
         config.read(CONFIG_FILE)
-        distro_config = piupartslib.conf.DistroConfig(DISTRO_CONFIG_FILE, config["mirror"])
-        db = piupartslib.packagesdb.PackagesDB(prefix=section)
+        distro_config = DistroConfig(DISTRO_CONFIG_FILE, config["mirror"])
+        db = PackagesDB(prefix=section)
         if self._recycle_mode and self._section == section:
             db.enable_recycling()
         self._package_databases[section] = db
