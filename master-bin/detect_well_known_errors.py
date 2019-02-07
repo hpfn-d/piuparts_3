@@ -29,7 +29,7 @@ import argparse
 import fcntl
 from collections import deque
 
-import piupartslib
+from piupartslib.conf import Config as PiupartsLibConfig
 from piupartslib.conf import MissingSection
 from piupartslib.dwke import *
 
@@ -44,13 +44,13 @@ class Busy(Exception):
         self.args = "section is locked by another process",
 
 
-class WKE_Config(piupartslib.conf.Config):
+class WKE_Config(PiupartsLibConfig):
 
     """Configuration parameters for Well Known Errors"""
 
     def __init__(self, section="global", defaults_section=None):
         self.section = section
-        piupartslib.conf.Config.__init__(self, section,
+        PiupartsLibConfig.__init__(self, section,
                                          {
                                          "sections": "report",
                                          "master-directory": ".",
