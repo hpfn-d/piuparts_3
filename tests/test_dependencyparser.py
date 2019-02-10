@@ -1,13 +1,13 @@
-import unittest
-import piupartslib.dependencyparser
+from unittest import TestCase
+from piupartslib.dependencyparser import DependencyParser
 
 
-class DependencyParserTests(unittest.TestCase):
+class DependencyParserTests(TestCase):
 
     """Tests for module dependencyparser."""
 
     def parse(self, str):
-        parser = piupartslib.dependencyparser.DependencyParser(str)
+        parser = DependencyParser(str)
         deps = parser.get_dependencies()
         names = []
         for dep in deps:
