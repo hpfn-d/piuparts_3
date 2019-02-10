@@ -2,13 +2,13 @@
 
 import os
 import StringIO
-import unittest
+from unittest import TestCase
 
 
-import piupartslib.packagesdb
+from piupartslib.packagesdb import LogDB
+from piupartslib.packagesdb import PackagesDB
 
-
-class FakeLogDB(piupartslib.packagesdb.LogDB):
+class FakeLogDB(LogDB):
 
     """A fake version of the LogDB class, for testing
 
@@ -46,10 +46,10 @@ class FakeLogDB(piupartslib.packagesdb.LogDB):
         return True
 
 
-class PackagesDbTests(unittest.TestCase):
+class PackagesDbTests(TestCase):
 
     def new_db(self, packages_file_contents):
-        db = piupartslib.packagesdb.PackagesDB(FakeLogDB())
+        db = PackagesDB(FakeLogDB())
         db.read_packages_file(StringIO.StringIO(packages_file_contents))
         return db
 
