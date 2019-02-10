@@ -23,9 +23,9 @@ import zlib
 import urllib2
 
 
-import conf
-import dependencyparser
-import packagesdb
+# import conf
+# import dependencyparser
+# import packagesdb
 
 
 class DecompressedStream():
