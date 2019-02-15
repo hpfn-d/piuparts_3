@@ -1016,6 +1016,26 @@ class Chroot:
             logging.debug("disabling testdebs repository")
             remove_files([self.relative("etc/apt/sources.list.d/piuparts-testdebs-repo.list")])
 
+    @staticmethod
+    def get_proxy():
+        if settings.proxy:
+            proxy = settings.proxy
+        elif "http_proxy" in os.environ:
+            proxy = os.environ["http_proxy"]
+        else:
+            proxy = None
+            pat = re.compile(r"^Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
+            p = subprocess.Popen(["apt-config", "dump"],
+                                 stdout=subprocess.PIPE)
+            stdout, _ = p.communicate()
+            if stdout:
+                for line in stdout.split("\n"):
+                    m = re.match(pat, line)
+                    if proxy is None and m:
+                        proxy = m.group(1)
+
+        return proxy
+
     def create_apt_conf(self):
         """Create /etc/apt/apt.conf.d/piuparts inside the chroot."""
         lines = ['APT::Get::Assume-Yes "yes";\n']
