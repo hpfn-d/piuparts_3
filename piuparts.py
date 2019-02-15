@@ -1043,6 +1043,8 @@ class Chroot:
         if settings.no_check_valid_until:
             lines.append('Acquire::Check-Valid-Until "false";\n')
 
+        proxy = Chroot.get_proxy()
+
         if proxy:
             lines.append('Acquire::http::Proxy "%s";\n' % proxy)
         if settings.dpkg_force_unsafe_io:
