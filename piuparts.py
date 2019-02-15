@@ -1018,21 +1018,18 @@ class Chroot:
 
     @staticmethod
     def get_proxy():
+        proxy = None
         if settings.proxy:
             proxy = settings.proxy
         elif "http_proxy" in os.environ:
             proxy = os.environ["http_proxy"]
         else:
-            proxy = None
-            pat = re.compile(r"^Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
-            p = subprocess.Popen(["apt-config", "dump"],
-                                 stdout=subprocess.PIPE)
+            pat = re.compile(r"Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
+            p = subprocess.Popen(["apt-config", "dump"], stdout=subprocess.PIPE)
             stdout, _ = p.communicate()
-            if stdout:
-                for line in stdout.split("\n"):
-                    m = re.match(pat, line)
-                    if proxy is None and m:
-                        proxy = m.group(1)
+            m = re.search(pat, stdout)
+            if m:
+                proxy = m.group(1)
 
         return proxy
 
