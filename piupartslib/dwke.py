@@ -237,6 +237,57 @@ def clean_cache_files(logdict, cachedict, recheck=False, recheck_failed=False,
     return count
 
 
+def read_logpath(logpath):
+    try:
+        with open(logpath, 'r') as lb:
+            return lb.read()
+    except IOError:
+        logging.error("File error processing %s", logpath)
+        return None
+
+
+def write_kprs(logpath, kprs):
+    kpr_path = get_kpr_path(logpath)
+    try:
+        with open(kpr_path, 'w') as f:
+            f.write(kprs)
+    except IOError:
+        logging.error("File error processing %s", kpr_path)
+
+
+def kprs_string(logpath, pkg_spec, problem_list, logbody):
+    """
+    kprs can be:
+     - a string with at least one .log
+     - a string with 'unclassified'
+     - empty string
+    """
+    where = get_where(logpath)
+
+    kprs = ["%s/%s.log %s\n" % (where, pkg_spec, problem.name)
+            for problem in problem_list
+            if problem.has_problem(logbody, where)]
+
+    kprs = ''.join(kprs)
+
+    if where != 'pass' and not kprs:
+        kprs = "%s/%s.log %s\n" % (where, pkg_spec, "unclassified_failures.conf")
+
+    return kprs
+
+
+def build_kprs(needs_kpr, logdict, problem_list):
+    """
+    needs_kpr only as iterator
+    """
+    for pkg_spec in needs_kpr:
+        logpath = logdict[pkg_spec]
+        logbody = read_logpath(logpath)
+        #if logbody is not None:
+        kprs = kprs_string(logpath, pkg_spec, problem_list, logbody)
+        write_kprs(logpath, kprs)
+
+
 def make_kprs(logdict, kprdict, problem_list):
     """Create kpr files, as necessary, so every log file has one
        kpr entries are e.g.
@@ -244,28 +295,7 @@ def make_kprs(logdict, kprdict, problem_list):
 
     needs_kpr = set(logdict.keys()).difference(set(kprdict.keys()))
 
-    for pkg_spec in needs_kpr:
-        logpath = logdict[pkg_spec]
-
-        try:
-            with open(logpath, 'r') as lb:
-                logbody = lb.read()
-
-            where = get_where(logpath)
-
-            kprs = ["%s/%s.log %s\n" % (where, pkg_spec, problem.name)
-                    for problem in problem_list
-                    if problem.has_problem(logbody, where)]
-
-            kprs = ''.join(kprs)
-
-            if where != 'pass' and not kprs:
-                kprs = "%s/%s.log %s\n" % (where, pkg_spec, "unclassified_failures.conf")
-
-            with open(get_kpr_path(logpath), 'w') as f:
-                f.write(kprs)
-        except IOError:
-            logging.error("File error processing %s" % logpath)
+    build_kprs(needs_kpr, logdict, problem_list)
 
     return len(needs_kpr)
 
