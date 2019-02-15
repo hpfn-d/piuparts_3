@@ -276,6 +276,19 @@ def kprs_string(logpath, pkg_spec, problem_list, logbody):
     return kprs
 
 
+def build_kprs(needs_kpr, logdict, problem_list):
+    """
+    needs_kpr only as iterator
+    if no IOError call kprs stuff
+    """
+    for pkg_spec in needs_kpr:
+        logpath = logdict[pkg_spec]
+        logbody = read_logpath(logpath)
+        if logbody is not None:
+            kprs = kprs_string(logpath, pkg_spec, problem_list, logbody)
+            write_kprs(logpath, kprs)
+
+
 def make_kprs(logdict, kprdict, problem_list):
     """Create kpr files, as necessary, so every log file has one
        kpr entries are e.g.
@@ -283,10 +296,7 @@ def make_kprs(logdict, kprdict, problem_list):
 
     needs_kpr = set(logdict.keys()).difference(set(kprdict.keys()))
 
-    for pkg_spec in needs_kpr:
-        logpath = logdict[pkg_spec]
-
-
+    build_kprs(needs_kpr, logdict, problem_list)
 
     return len(needs_kpr)
 
