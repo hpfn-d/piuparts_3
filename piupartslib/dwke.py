@@ -237,6 +237,15 @@ def clean_cache_files(logdict, cachedict, recheck=False, recheck_failed=False,
     return count
 
 
+def read_logpath(logpath):
+    try:
+        with open(logpath, 'r') as lb:
+            return lb.read()
+    except IOError:
+        logging.error("File error processing %s", logpath)
+        return None
+
+
 def kprs_string(logpath, pkg_spec, problem_list, logbody):
     """
     kprs can be:
@@ -269,10 +278,6 @@ def make_kprs(logdict, kprdict, problem_list):
         logpath = logdict[pkg_spec]
 
         try:
-            with open(logpath, 'r') as lb:
-                logbody = lb.read()
-
-
 
             with open(get_kpr_path(logpath), 'w') as f:
                 f.write(kprs)
