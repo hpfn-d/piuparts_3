@@ -184,3 +184,59 @@ class IsBrokenSymlinkTests(unittest.TestCase):
         self.symlink("/final-dir", "second-link")
         self.failIf(is_broken_symlink(self.testdir, self.testdir,
                                       "first-link"))
+
+
+class SetProxyTest(unittest.TestCase):
+    def setUp(self):
+        self.mox = mox.Mox()
+        self.proxy_orig = piuparts.settings.proxy
+        self.env_orig = piuparts.os.environ
+
+    def tearDown(self):
+        piuparts.settings.proxy = self.proxy_orig
+        piuparts.os.environ = self.env_orig
+        self.mox.UnsetStubs()
+
+    def test_proxy_settings(self):
+        piuparts.settings.proxy = 'settings'
+        piuparts.os.environ = dict()
+        proxy = piuparts.Chroot.get_proxy()
+        self.assertEqual(proxy, 'settings')
+
+    def test_proxy_environ(self):
+        piuparts.settings.proxy = None
+        piuparts.os.environ = dict(http_proxy='environ')
+        proxy = piuparts.Chroot.get_proxy()
+        self.assertEqual(proxy, 'environ')
+
+    def test_proxy_apt_config(self):
+        piuparts.settings.proxy = None
+        piuparts.os.environ = dict()
+        stdout = 'Acquire::CompressionTypes::lz4 "lz4";\n'
+        stdout += 'Acquire::Languages:: "en_US";\n'
+        stdout += 'Binary::apt-get::Acquire::AllowInsecureRepositories "1";\n'
+        stdout += 'CommandLine "";\n'
+        stdout += 'Acquire::http::proxy "http://proxy.company.com:80/";\n'
+        stdout += 'Acquire::IndexTargets::deb::Packages::Optional "0";\n'
+
+        self.mox.StubOutWithMock(piuparts.subprocess.Popen, 'communicate')
+        piuparts.subprocess.Popen.communicate().AndReturn((stdout, ''))
+        self.mox.ReplayAll()
+
+        proxy = piuparts.Chroot.get_proxy()
+        self.assertEqual(proxy, 'http://proxy.company.com:80/')
+        self.mox.VerifyAll()
+
+    def test_proxy_none(self):
+        piuparts.settings.proxy = None
+        piuparts.os.environ = dict()
+        stdout = 'Binary::apt-get::Acquire::AllowInsecureRepositories "1";\n'
+        stdout += 'CommandLine "";\n'
+
+        self.mox.StubOutWithMock(piuparts.subprocess.Popen, 'communicate')
+        piuparts.subprocess.Popen.communicate().AndReturn((stdout, ''))
+        self.mox.ReplayAll()
+
+        proxy = piuparts.Chroot.get_proxy()
+        self.assertIsNone(proxy)
+        self.mox.VerifyAll()
