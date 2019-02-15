@@ -237,6 +237,27 @@ def clean_cache_files(logdict, cachedict, recheck=False, recheck_failed=False,
     return count
 
 
+def kprs_string(logpath, pkg_spec, problem_list, logbody):
+    """
+    kprs can be:
+     - a string with at least one .log
+     - a string with 'unclassified'
+     - empty string
+    """
+    where = get_where(logpath)
+
+    kprs = ["%s/%s.log %s\n" % (where, pkg_spec, problem.name)
+            for problem in problem_list
+            if problem.has_problem(logbody, where)]
+
+    kprs = ''.join(kprs)
+
+    if where != 'pass' and not kprs:
+        kprs = "%s/%s.log %s\n" % (where, pkg_spec, "unclassified_failures.conf")
+
+    return kprs
+
+
 def make_kprs(logdict, kprdict, problem_list):
     """Create kpr files, as necessary, so every log file has one
        kpr entries are e.g.
@@ -251,16 +272,7 @@ def make_kprs(logdict, kprdict, problem_list):
             with open(logpath, 'r') as lb:
                 logbody = lb.read()
 
-            where = get_where(logpath)
 
-            kprs = ["%s/%s.log %s\n" % (where, pkg_spec, problem.name)
-                    for problem in problem_list
-                    if problem.has_problem(logbody, where)]
-
-            kprs = ''.join(kprs)
-
-            if where != 'pass' and not kprs:
-                kprs = "%s/%s.log %s\n" % (where, pkg_spec, "unclassified_failures.conf")
 
             with open(get_kpr_path(logpath), 'w') as f:
                 f.write(kprs)
