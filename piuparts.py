@@ -1036,6 +1036,7 @@ class Chroot:
     def create_apt_conf(self):
         """Create /etc/apt/apt.conf.d/piuparts inside the chroot."""
         lines = ['APT::Get::Assume-Yes "yes";\n']
+        # it is not necessary to call .append
         lines.append('APT::Install-Recommends "%d";\n' % int(settings.install_recommends))
         lines.append('APT::Install-Suggests "%d";\n' % int(settings.install_suggests))
         lines.append('APT::Get::AllowUnauthenticated "%s";\n' % settings.apt_unauthenticated)
