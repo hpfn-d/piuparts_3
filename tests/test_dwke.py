@@ -74,18 +74,18 @@ class DwkeTests(TestCase):
         self.assertEqual('', kprs)
         self.mox.VerifyAll()
 
-    def test_build_kprs_without_logbody(self):
-        """
-        read_path return None - logbody is None
-        kprs stuff are not called
-        """
-        self.mox.StubOutWithMock(dwke, 'read_logpath')
-        dwke.read_logpath(mox.IgnoreArg())
-        self.mox.ReplayAll()
-        needs_kpr = ['btcheck']
-        logdict = dict(btcheck='/var/log/btcheck.log')
-        self.assertIsNone(build_kprs(needs_kpr, logdict, 'Raises'))
-        self.mox.VerifyAll()
+    # def test_build_kprs_without_logbody(self):
+    #     """
+    #     read_path return None - logbody is None
+    #     kprs stuff are not called
+    #     """
+    #     self.mox.StubOutWithMock(dwke, 'read_logpath')
+    #     dwke.read_logpath(mox.IgnoreArg())
+    #     self.mox.ReplayAll()
+    #     needs_kpr = ['btcheck']
+    #     logdict = dict(btcheck='/var/log/btcheck.log')
+    #     self.assertIsNone(build_kprs(needs_kpr, logdict, 'Raises'))
+    #     self.mox.VerifyAll()
 
     def test_build_kprs_with_logbody(self):
         """
