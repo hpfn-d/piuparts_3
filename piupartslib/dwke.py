@@ -246,6 +246,15 @@ def read_logpath(logpath):
         return None
 
 
+def write_kprs(logpath, kprs):
+    kpr_path = get_kpr_path(logpath)
+    try:
+        with open(kpr_path, 'w') as f:
+            f.write(kprs)
+    except IOError:
+        logging.error("File error processing %s", kpr_path)
+
+
 def kprs_string(logpath, pkg_spec, problem_list, logbody):
     """
     kprs can be:
@@ -277,12 +286,7 @@ def make_kprs(logdict, kprdict, problem_list):
     for pkg_spec in needs_kpr:
         logpath = logdict[pkg_spec]
 
-        try:
 
-            with open(get_kpr_path(logpath), 'w') as f:
-                f.write(kprs)
-        except IOError:
-            logging.error("File error processing %s" % logpath)
 
     return len(needs_kpr)
 
