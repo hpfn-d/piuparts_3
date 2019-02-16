@@ -186,7 +186,7 @@ class IsBrokenSymlinkTests(unittest.TestCase):
                                       "first-link"))
 
 
-class SetProxyTest(unittest.TestCase):
+class ChrootTest(unittest.TestCase):
     def setUp(self):
         self.mox = mox.Mox()
         self.proxy_orig = piuparts.settings.proxy
@@ -196,6 +196,35 @@ class SetProxyTest(unittest.TestCase):
         piuparts.settings.proxy = self.proxy_orig
         piuparts.os.environ = self.env_orig
         self.mox.UnsetStubs()
+
+    def test_create_apt_conf_calls_get_proxy(self):
+        piuparts.settings.proxy = None
+        piuparts.settings.apt_unauthenticated = None
+        piuparts.settings.dpkg_force_unsafe_io = None
+        piuparts.os.environ = dict()
+        get_proxy_return =  'http_get_proxy'
+        lines = ['APT::Get::Assume-Yes "yes";\n',
+                 'APT::Install-Recommends "0";\n',
+                 'APT::Install-Suggests "0";\n',
+                 'APT::Get::AllowUnauthenticated "None";\n',
+                 'Acquire::PDiffs "false";\n',
+                 'Acquire::http::Proxy "%s";\n' % get_proxy_return,
+        ]
+        lines = ''.join(lines)
+
+        self.mox.StubOutWithMock(piuparts.Chroot, 'get_proxy')
+        piuparts.Chroot.get_proxy().AndReturn(get_proxy_return)
+
+        self.mox.StubOutWithMock(piuparts.Chroot, 'relative')
+        piuparts.Chroot.relative(mox.IgnoreArg())
+
+        self.mox.StubOutWithMock(piuparts, 'create_file')
+        piuparts.create_file(None, lines)
+        self.mox.ReplayAll()
+
+        p = piuparts.Chroot()
+        p.create_apt_conf()
+        self.mox.VerifyAll()
 
     def test_proxy_settings(self):
         piuparts.settings.proxy = 'settings'
