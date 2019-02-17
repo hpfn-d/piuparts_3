@@ -80,11 +80,14 @@ class DwkeTests(TestCase):
         kprs stuff are not called
         """
         self.mox.StubOutWithMock(dwke, 'read_logpath')
-        dwke.read_logpath(mox.IgnoreArg())
+        dwke.read_logpath(mox.IgnoreArg()).AndReturn(None)
         self.mox.ReplayAll()
         needs_kpr = ['btcheck']
         logdict = dict(btcheck='/var/log/btcheck.log')
-        self.assertIsNone(build_kprs(needs_kpr, logdict, 'Raises'))
+        try:
+            build_kprs(needs_kpr, logdict, 'Raises')
+        except AttributeError:
+            self.fail("build_kprs() should not raise 'AttributeError' in this test")
         self.mox.VerifyAll()
 
     def test_build_kprs_with_logbody(self):
