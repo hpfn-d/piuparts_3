@@ -1024,10 +1024,10 @@ class Chroot:
         elif "http_proxy" in os.environ:
             proxy = os.environ["http_proxy"]
         else:
-            pat = re.compile(r"Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
+            pat = "Acquire::http::Proxy\s+\"([^\"]+)\""
             p = subprocess.Popen(["apt-config", "dump"], stdout=subprocess.PIPE)
             stdout, _ = p.communicate()
-            m = re.search(pat, stdout)
+            m = re.search(pat, stdout, flags=re.I)
             if m:
                 proxy = m.group(1)
 
