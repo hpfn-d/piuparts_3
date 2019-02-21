@@ -1031,15 +1031,13 @@ class Chroot:
             proxy = os.environ["http_proxy"]
         else:
             proxy = None
-            pat = re.compile(r"^Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
+            pat = "Acquire::http::Proxy\s+\"([^\"]+)\""
             p = subprocess.Popen(["apt-config", "dump"],
                                  stdout=subprocess.PIPE)
             stdout, _ = p.communicate()
-            if stdout:
-                for line in stdout.split("\n"):
-                    m = re.match(pat, line)
-                    if proxy is None and m:
-                        proxy = m.group(1)
+            m = re.search(pat, str(stdout), flags=re.I)
+            if m:
+                proxy = m.group(1)
         if proxy:
             lines.append('Acquire::http::Proxy "%s";\n' % proxy)
         if settings.dpkg_force_unsafe_io:
