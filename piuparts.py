@@ -1025,10 +1025,12 @@ class Chroot:
         lines.append('Acquire::PDiffs "false";\n')
         if settings.no_check_valid_until:
             lines.append('Acquire::Check-Valid-Until "false";\n')
+
+        acquire_string = 'Acquire::http::Proxy "%s";\n'
         if settings.proxy:
-            proxy = settings.proxy
+            proxy = acquire_string % settings.proxy
         elif "http_proxy" in os.environ:
-            proxy = os.environ["http_proxy"]
+            proxy = acquire_string % os.environ["http_proxy"]
         else:
             p = subprocess.Popen(["apt-config", "dump", "Acquire::http::Proxy"],
                                  stdout=subprocess.PIPE)
