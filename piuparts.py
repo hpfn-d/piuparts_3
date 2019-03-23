@@ -1650,9 +1650,7 @@ class Chroot:
         return chroot_state
 
     def relative(self, pathname):
-        if pathname.startswith('/'):
-            return os.path.join(self.name, pathname[1:])
-        return os.path.join(self.name, pathname)
+        return os.path.join(self.name, pathname.lstrip('/'))
 
     def get_files_owned_by_packages(self):
         """Return dict[filename] = [packagenamelist]."""
