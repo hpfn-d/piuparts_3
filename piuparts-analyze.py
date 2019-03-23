@@ -115,14 +115,12 @@ class PiupartsBTS():
             alarm(60)
             found_versions = debianbts.get_status(bug)[0].found_versions
             alarm(0)
-            versions = []
-            for found_version in found_versions:
-                v = found_version.rsplit('/', 1)[-1]
-                if v == "None":
-                    # ignore $DISTRO/None versions
-                    pass
-                else:
-                    versions.append(v)
+
+            versions = [found_version.rsplit('/', 1)[-1]
+                        for found_version in found_versions
+                        if not found_version.endswith("None")]
+
+
             self._bug_versions[bug] =  list(reversed(sorted(versions, cmp=apt_pkg.version_compare))) or ['~']
         self._queries += 1
         return self._bug_versions[bug]
