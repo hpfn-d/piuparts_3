@@ -1025,23 +1025,19 @@ class Chroot:
         lines.append('Acquire::PDiffs "false";\n')
         if settings.no_check_valid_until:
             lines.append('Acquire::Check-Valid-Until "false";\n')
+
+        acquire_string = 'Acquire::http::Proxy "%s";\n'
         if settings.proxy:
-            proxy = settings.proxy
+            proxy = acquire_string % settings.proxy
         elif "http_proxy" in os.environ:
-            proxy = os.environ["http_proxy"]
+            proxy = acquire_string % os.environ["http_proxy"]
         else:
-            proxy = None
-            pat = re.compile(r"^Acquire::http::Proxy\s+\"([^\"]+)\"", re.I)
-            p = subprocess.Popen(["apt-config", "dump"],
+            p = subprocess.Popen(["apt-config", "dump", "Acquire::http::Proxy"],
                                  stdout=subprocess.PIPE)
-            stdout, _ = p.communicate()
-            if stdout:
-                for line in stdout.split("\n"):
-                    m = re.match(pat, line)
-                    if proxy is None and m:
-                        proxy = m.group(1)
+            proxy, _ = p.communicate()
+
         if proxy:
-            lines.append('Acquire::http::Proxy "%s";\n' % proxy)
+            lines.append(proxy)
         if settings.dpkg_force_unsafe_io:
             lines.append('Dpkg::Options {"--force-unsafe-io";};\n')
         if settings.dpkg_force_confdef:
