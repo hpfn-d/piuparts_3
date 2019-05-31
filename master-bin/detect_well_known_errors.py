@@ -28,8 +28,9 @@ import logging
 import argparse
 import fcntl
 from collections import deque
+from copy import deepcopy
 
-import piupartslib
+from piupartslib.conf import Config as PiupartsLibConfig
 from piupartslib.conf import MissingSection
 from piupartslib.dwke import *
 
@@ -44,13 +45,13 @@ class Busy(Exception):
         self.args = "section is locked by another process",
 
 
-class WKE_Config(piupartslib.conf.Config):
+class WKE_Config(PiupartsLibConfig):
 
     """Configuration parameters for Well Known Errors"""
 
     def __init__(self, section="global", defaults_section=None):
         self.section = section
-        piupartslib.conf.Config.__init__(self, section,
+        PiupartsLibConfig.__init__(self, section,
                                          {
                                          "sections": "report",
                                          "master-directory": ".",
@@ -89,10 +90,12 @@ def process_section(section, config, problem_list,
         kprdict = get_file_dict(workdirs, KPR_EXT)
         bugdict = get_file_dict(workdirs, BUG_EXT)
 
-        del_cnt = clean_cache_files(logdict, kprdict, recheck, recheck_failed)
+        cp_kprdict = deepcopy(kprdict)
+
+        del_cnt = clean_cache_files(logdict, cp_kprdict, recheck, recheck_failed)
         clean_cache_files(logdict, bugdict, skipnewer=True)
 
-        kprdict = get_file_dict(workdirs, KPR_EXT)
+        # kprdict = get_file_dict(workdirs, KPR_EXT)
 
         section_config = WKE_Config(section=section, defaults_section="global")
         section_config.read(CONFIG_FILE)
