@@ -48,7 +48,11 @@ try:
 except:
     pass
 
-import piupartslib
+# import piupartslib
+from piupartslib.conf import Config as PiupartsLibConfig
+from piupartslib.conf import DistroConfig
+from piupartslib.packagesdb import PackagesDB
+
 from piupartslib.conf import MissingSection
 from piupartslib.dwke import *
 import piupartslib.pkgsummary as pkgsummary
@@ -502,11 +506,11 @@ linktarget_by_template = [
 ]
 
 
-class Config(piupartslib.conf.Config):
+class Config(PiupartsLibConfig):
 
     def __init__(self, section="report", defaults_section=None):
         self.section = section
-        piupartslib.conf.Config.__init__(self, section,
+        PiupartsLibConfig.__init__(self, section,
             {
                 "sections": "report",
                 "output-directory": "html",
@@ -805,7 +809,7 @@ class Section:
     def __init__(self, section, master_directory, doc_root, packagedb_cache={}):
         self._config = Config(section=section, defaults_section="global")
         self._config.read(CONFIG_FILE)
-        self._distro_config = piupartslib.conf.DistroConfig(
+        self._distro_config = DistroConfig(
             DISTRO_CONFIG_FILE, self._config["mirror"])
         logging.debug("-------------------------------------------")
         logging.debug("Running section " + self._config.section)
@@ -825,7 +829,7 @@ class Section:
         self._load_package_database(section, master_directory)
         self._binary_db = self._package_databases[section]
 
-        self._source_db = piupartslib.packagesdb.PackagesDB(prefix=self._section_directory)
+        self._source_db = PackagesDB(prefix=self._section_directory)
         self._source_db.load_packages_urls(
             self._distro_config.get_sources_urls(
                 self._config.get_distro(),
@@ -854,7 +858,7 @@ class Section:
             # only cache the most recent base database
             self._packagedb_cache.clear()
         sectiondir = os.path.join(master_directory, section)
-        db = piupartslib.packagesdb.PackagesDB(prefix=sectiondir)
+        db = PackagesDB(prefix=sectiondir)
         self._package_databases[section] = db
         if config["depends-sections"]:
             deps = config["depends-sections"].split()

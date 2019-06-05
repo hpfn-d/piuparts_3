@@ -1,13 +1,13 @@
-import unittest
+from unittest import TestCase
 
-import piupartslib.conf as conf
+from piupartslib.conf import Config as PiupartsLibConfig
 import distro_info
 
 
-class ConfStdDistroTests(unittest.TestCase):
+class ConfStdDistroTests(TestCase):
 
     def setUp(self):
-        self.cobj = conf.Config('notimportant', {})
+        self.cobj = PiupartsLibConfig('notimportant', {})
 
         debdist = distro_info.DebianDistroInfo()
         self.stable = debdist.stable()

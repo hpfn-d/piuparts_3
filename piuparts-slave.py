@@ -36,9 +36,10 @@ import random
 import apt_pkg
 import pipes
 
-import piupartslib.conf
-import piupartslib.packagesdb
+from piupartslib.conf import Config as PiupartsLibConfig
+from piupartslib.conf import DistroConfig
 from piupartslib.conf import MissingSection
+from piupartslib.packagesdb import PackagesFile
 
 apt_pkg.init_system()
 
@@ -68,11 +69,11 @@ def setup_logging(log_level, log_file_name):
         logger.addHandler(handler)
 
 
-class Config(piupartslib.conf.Config):
+class Config(PiupartsLibConfig):
 
     def __init__(self, section="slave", defaults_section=None):
         self.section = section
-        piupartslib.conf.Config.__init__(self, section,
+        PiupartsLibConfig.__init__(self, section,
                                          {
                                          "sections": "slave",
                                          "basetgz-sections": "",
@@ -345,7 +346,7 @@ class Section:
     def __init__(self, section, slave=None):
         self._config = Config(section=section, defaults_section="global")
         self._config.read(CONFIG_FILE)
-        self._distro_config = piupartslib.conf.DistroConfig(
+        self._distro_config = DistroConfig(
             DISTRO_CONFIG_FILE, self._config["mirror"])
         self._error_wait_until = 0
         self._idle_wait_until = 0
@@ -477,7 +478,7 @@ class Section:
             logging.info("unknown section " + self._config.section)
             self._error_wait_until = time.time() + 3600
             return 0
-        self._distro_config = piupartslib.conf.DistroConfig(
+        self._distro_config = DistroConfig(
                 DISTRO_CONFIG_FILE, self._config["mirror"])
 
         if interrupted or got_sighup:
@@ -619,7 +620,7 @@ class Section:
         for distro in [self._config.get_distro()] + self._config.get_distros():
             if distro not in packages_files:
                 try:
-                    pf = piupartslib.packagesdb.PackagesFile()
+                    pf = PackagesFile()
                     pf.load_packages_urls(
                         self._distro_config.get_packages_urls(
                             distro,
