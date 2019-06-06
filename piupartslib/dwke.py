@@ -223,14 +223,26 @@ def clean_cache_files(logdict, cachedict, recheck=False, recheck_failed=False,
     count = 0
     for pkgspec in cachedict:
         try:
-            if pkgspec not in logdict \
-                or (os.path.getmtime(logdict[pkgspec]) > os.path.getmtime(cachedict[pkgspec]) and not skipnewer)\
-                or get_where(logdict[pkgspec]) != get_where(cachedict[pkgspec])\
-                or recheck\
-                    or (recheck_failed and not get_where(cachedict[pkgspec]) in ['pass']):
+            # first condition
+            if pkgspec not in logdict:
                 os.remove(cachedict[pkgspec])
                 count = count + 1
-        except (IOError, OSError):
+                continue
+
+            # time last modification path
+            ptime_log_file_gt = os.path.getmtime(logdict[pkgspec]) > os.path.getmtime(cachedict[pkgspec])
+            use_log_file_new_path = ptime_log_file_gt and not skipnewer
+            # components
+            cache_whr_compon = get_where(cachedict[pkgspec])
+            log_cache_whr_compons_differ = get_where(logdict[pkgspec]) != cache_whr_compon
+
+            recheck_failed_cache_not_pass = recheck_failed and cache_whr_compon != 'pass'
+
+            if use_log_file_new_path or log_cache_whr_compons_differ \
+                    or recheck or recheck_failed_cache_not_pass:
+                os.remove(cachedict[pkgspec])
+                count = count + 1
+        except OSError:
             # logfile may have disappeared
             pass
 
